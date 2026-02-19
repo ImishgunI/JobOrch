@@ -38,3 +38,13 @@ tasks:
         else
           echo "go-task exists"
         fi
+
+  up:
+    desc: Up docker-compose
+    cmds:
+      - docker-compose up -d
+  
+  down:
+    desc: Down docker-compose
+    cmds:
+      - docker-compose down -v
