@@ -13,19 +13,19 @@ tasks:
       - install
   
   build:
-    desc: Build binary file
+    desc: Build to binary file
     cmds:
       - mkdir -p {{.BIN_DIR}}
       - go build -o {{.BIN_DIR}}/main ./cmd/api/main.go
       - chmod +x {{.BIN_DIR}}/main
 
   run:
-    desc: Run executable file
+    desc: Run the application
     cmds:
       - ./{{.BIN_DIR}}/main
   
   clean:
-    desc: Clean binary file
+    desc: Clean a binary file
     cmds:
       - rm -f {{.BIN_DIR}}/main
 
