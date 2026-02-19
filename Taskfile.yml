@@ -1,0 +1,20 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: '3'
+
+tasks:
+  fix:
+    desc: Call go fix command
+    cmds:
+      - go fix ./...
+    deps:
+      - install
+  
+  install:
+    desc: Checks for the presence of the utility
+    cmds: 
+      - |
+        if !command -v go-task &> /dev/null; then
+          go install github.com/go-task/task/v3/cmd/task@latest
+        else
+          echo "go-task exists"
+        fi
