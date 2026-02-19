@@ -1,6 +1,9 @@
 # yaml-language-server: $schema=https://taskfile.dev/schema.json
 version: '3'
 
+vars: 
+  BIN_DIR: bin
+
 tasks:
   fix:
     desc: Call go fix command
@@ -9,6 +12,23 @@ tasks:
     deps:
       - install
   
+  build:
+    desc: Build binary file
+    cmds:
+      - mkdir -p {{.BIN_DIR}}
+      - go build -o {{.BIN_DIR}}/main ./cmd/api/main.go
+      - chmod +x {{.BIN_DIR}}/main
+
+  run:
+    desc: Run executable file
+    cmds:
+      - ./{{.BIN_DIR}}/main
+  
+  clean:
+    desc: Clean binary file
+    cmds:
+      - rm -f {{.BIN_DIR}}/main
+
   install:
     desc: Checks for the presence of the utility
     cmds: 
