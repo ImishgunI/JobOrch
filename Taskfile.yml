@@ -39,6 +39,11 @@ tasks:
           echo "go-task exists"
         fi
 
+  lint:
+    desc: Start golangci.yaml
+    cmds:
+      - golangci-lint run --config ./.golangci.yml 
+
   up:
     desc: Up docker-compose
     cmds:
