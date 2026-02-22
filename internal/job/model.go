@@ -1,12 +1,7 @@
 package job
 
-import "time"
+import "context"
 
-type Job struct {
-	CreatedAt time.Time
-	ID        string
-	Payload   []byte
-	Status    Status
-	Retry     int
-	MaxRetry  int
+type Job interface {
+	Execute(ctx context.Context) error
 }
