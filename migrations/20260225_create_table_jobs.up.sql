@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS jobs (
     payload jsonb NOT NULL,
     error text,
     created_at timestamptz NOT NULL DEFAULT now(),
-    updated_at timestamptz NOT NULL,
+    updated_at timestamptz NOT NULL DEFAULT now(),
 );
 
 CREATE INDEX IF NOT EXISTS jobs_status_idx ON jobs (status);
