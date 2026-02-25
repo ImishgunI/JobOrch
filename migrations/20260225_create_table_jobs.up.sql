@@ -5,9 +5,21 @@ CREATE TABLE IF NOT EXISTS jobs (
     status job_status NOT NULL,
     payload jsonb NOT NULL,
     error text,
-    created_at timestamp without time zone NOT NULL DEFAULT now(),
-    updated_at timestamp without time zone NOT NULL DEFAULT now()
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL,
 );
 
-CREATE INDEX IF NOT EXISTS jobs_id_idx ON jobs (id);
 CREATE INDEX IF NOT EXISTS jobs_status_idx ON jobs (status);
+
+CREATE OR REPLACE FUNCTION update_timestamp()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = now();
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER tgr_update_timestamp
+BEFORE UPDATE ON jobs
+FOR EACH ROW
+EXECUTE FUNCTION update_timestamp()
