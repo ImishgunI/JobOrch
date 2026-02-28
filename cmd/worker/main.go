@@ -3,9 +3,11 @@ package main
 import (
 	"JobOrch/adapters/postgres"
 	"JobOrch/internal/platform/workerpool"
+	"JobOrch/internal/scheduler"
 	"context"
 	"log"
 	"os"
+	"time"
 )
 
 func main() {
@@ -16,19 +18,9 @@ func main() {
 		log.Printf("%+v\n", err)
 		cancel()
 	}
-	for {
-		jobs, err := repo.GetPending(ctx, 10)
-		if err != nil {
-			log.Printf("%+v\n", err)
-			break
-		}
-		if len(jobs) == 0 {
-			break
-		}
-		for i := range jobs {
-			pool.Submit(ctx, &jobs[i])
-		}
-	}
+	duration := time.Duration(500) * time.Millisecond
+	s := scheduler.NewScheduler(repo, pool, 10, duration)
+	s.Run(ctx)
 	cancel()
 	pool.ShutDown()
 }
