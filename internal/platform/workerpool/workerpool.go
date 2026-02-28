@@ -8,16 +8,16 @@ import (
 	"sync"
 )
 
-type pool struct {
+type Pool struct {
 	taskQueue chan j.Job
 	wg        *sync.WaitGroup
 	pool_size int
 }
 
-func NewPool(ctx context.Context, maxConcurrency int) *pool {
+func NewPool(ctx context.Context, maxConcurrency int) *Pool {
 	job := make(chan j.Job, 10)
 	var wg sync.WaitGroup
-	p := &pool{
+	p := &Pool{
 		taskQueue: job,
 		wg:        &wg,
 		pool_size: maxConcurrency,
@@ -42,7 +42,7 @@ func NewPool(ctx context.Context, maxConcurrency int) *pool {
 	return p
 }
 
-func (p *pool) Submit(ctx context.Context, job j.Job) error {
+func (p *Pool) Submit(ctx context.Context, job j.Job) error {
 	select {
 	case <-ctx.Done():
 		return ctx.Err()
@@ -51,7 +51,7 @@ func (p *pool) Submit(ctx context.Context, job j.Job) error {
 	}
 }
 
-func (p *pool) worker(ctx context.Context, task j.Job) {
+func (p *Pool) worker(ctx context.Context, task j.Job) {
 	defer func() {
 		if r := recover(); r != nil {
 			log.Printf("%+v\n", r)
@@ -65,7 +65,7 @@ func (p *pool) worker(ctx context.Context, task j.Job) {
 	}
 }
 
-func (p *pool) ShutDown() {
+func (p *Pool) ShutDown() {
 	close(p.taskQueue)
 	p.wg.Wait()
 }
