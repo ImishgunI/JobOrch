@@ -2,7 +2,6 @@ package job
 
 import (
 	"context"
-	"log"
 	"time"
 
 	"github.com/google/uuid"
@@ -21,7 +20,4 @@ type JobRecord struct {
 	UpdatedAt time.Time `db:"updated_at"`
 }
 
-func (j *JobRecord) Execute(ctx context.Context) error {
-	log.Printf("Do work")
-	return nil
-}
+func (j *JobRecord) Execute(ctx context.Context) error
