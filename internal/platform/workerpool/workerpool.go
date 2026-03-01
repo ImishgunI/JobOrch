@@ -51,7 +51,7 @@ func (p *Pool) Submit(ctx context.Context, job j.Job) error {
 	}
 }
 
-func (p *Pool) worker(ctx context.Context, task j.Job) {
+func (p *Pool) worker(ctx context.Context, task j.Job) <-chan j.JobResult {
 	defer func() {
 		if r := recover(); r != nil {
 			log.Printf("%+v\n", r)
@@ -61,8 +61,15 @@ func (p *Pool) worker(ctx context.Context, task j.Job) {
 	err := task.Execute(ctx)
 	if err != nil {
 		log.Printf("%+v", err)
-		return
 	}
+	rec := task.(*j.JobRecord)
+	res := j.JobResult{
+		JobID: rec.ID,
+		Err:   err,
+	}
+	JobCh := make(chan j.JobResult, 1)
+	JobCh <- res
+	return JobCh
 }
 
 func (p *Pool) ShutDown() {
