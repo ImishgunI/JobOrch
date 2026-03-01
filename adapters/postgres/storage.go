@@ -8,21 +8,21 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type postgresRepo struct {
+type PostgresRepo struct {
 	pool *pgxpool.Pool
 }
 
-func NewPool(ctx context.Context, connection string) (*postgresRepo, error) {
+func NewPool(ctx context.Context, connection string) (*PostgresRepo, error) {
 	conn, err := pgxpool.New(ctx, connection)
 	if err != nil {
 		return nil, err
 	}
-	return &postgresRepo{
+	return &PostgresRepo{
 		pool: conn,
 	}, nil
 }
 
-func (r *postgresRepo) Create(ctx context.Context, record *j.JobRecord) error {
+func (r *PostgresRepo) Create(ctx context.Context, record *j.JobRecord) error {
 	_, err := r.pool.Exec(ctx,
 		`INSERT INTO jobs (id, status, payload, error) VALUES ($1, $2, $3, $4)`,
 		record.ID, record.Status, record.Payload, record.Error)
@@ -32,7 +32,7 @@ func (r *postgresRepo) Create(ctx context.Context, record *j.JobRecord) error {
 	return nil
 }
 
-func (r *postgresRepo) UpdateStatus(ctx context.Context, id uuid.UUID, status j.Status) error {
+func (r *PostgresRepo) UpdateStatus(ctx context.Context, id uuid.UUID, status j.Status) error {
 	_, err := r.pool.Exec(ctx, `
 	UPDATE jobs
 	SET status = $1
@@ -44,7 +44,7 @@ func (r *postgresRepo) UpdateStatus(ctx context.Context, id uuid.UUID, status j.
 	return nil
 }
 
-func (r *postgresRepo) SetError(ctx context.Context, id uuid.UUID, pg_err string) error {
+func (r *PostgresRepo) SetError(ctx context.Context, id uuid.UUID, pg_err string) error {
 	_, err := r.pool.Exec(ctx, `
 	UPDATE jobs
 	SET error = $1
@@ -56,7 +56,7 @@ func (r *postgresRepo) SetError(ctx context.Context, id uuid.UUID, pg_err string
 	return nil
 }
 
-func (r *postgresRepo) GetPending(ctx context.Context, limit int) ([]j.JobRecord, error) {
+func (r *PostgresRepo) GetPending(ctx context.Context, limit int) ([]j.JobRecord, error) {
 	tx, err := r.pool.Begin(ctx)
 	if err != nil {
 		return nil, err
