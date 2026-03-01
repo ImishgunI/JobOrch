@@ -20,4 +20,9 @@ type JobRecord struct {
 	UpdatedAt time.Time `db:"updated_at"`
 }
 
+type JobResult struct {
+	JobID uuid.UUID
+	Err   error
+}
+
 func (j *JobRecord) Execute(ctx context.Context) error
