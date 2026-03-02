@@ -9,18 +9,21 @@ import (
 )
 
 type Pool struct {
-	taskQueue chan j.Job
-	wg        *sync.WaitGroup
-	pool_size int
+	taskQueue   chan j.Job
+	resultQueue chan j.JobResult
+	wg          *sync.WaitGroup
+	pool_size   int
 }
 
 func NewPool(ctx context.Context, maxConcurrency int) *Pool {
 	job := make(chan j.Job, 10)
+	result := make(chan j.JobResult, 10)
 	var wg sync.WaitGroup
 	p := &Pool{
-		taskQueue: job,
-		wg:        &wg,
-		pool_size: maxConcurrency,
+		taskQueue:   job,
+		resultQueue: result,
+		wg:          &wg,
+		pool_size:   maxConcurrency,
 	}
 	p.wg.Add(p.pool_size)
 	for range p.pool_size {
@@ -51,28 +54,23 @@ func (p *Pool) Submit(ctx context.Context, job j.Job) error {
 	}
 }
 
-func (p *Pool) worker(ctx context.Context, task j.Job) <-chan j.JobResult {
+func (p *Pool) worker(ctx context.Context, task j.Job) {
 	defer func() {
 		if r := recover(); r != nil {
 			log.Printf("%+v\n", r)
 			log.Println(string(debug.Stack()))
 		}
 	}()
-	err := task.Execute(ctx)
-	if err != nil {
-		log.Printf("%+v", err)
-	}
-	rec := task.(*j.JobRecord)
-	res := j.JobResult{
-		JobID: rec.ID,
-		Err:   err,
-	}
-	JobCh := make(chan j.JobResult, 1)
-	JobCh <- res
-	return JobCh
+	result := task.Execute(ctx)
+	p.resultQueue <- (<-result)
+}
+
+func (p *Pool) Results() <-chan j.JobResult {
+	return p.resultQueue
 }
 
 func (p *Pool) ShutDown() {
 	close(p.taskQueue)
 	p.wg.Wait()
+	close(p.resultQueue)
 }
