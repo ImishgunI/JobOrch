@@ -20,6 +20,11 @@ func main() {
 	}
 	duration := time.Duration(500) * time.Millisecond
 	s := scheduler.NewScheduler(repo, pool, 10, duration)
+	go func() {
+		for result := range pool.Results() {
+			postgres.Updater(ctx, repo, result)
+		}
+	}()
 	s.Run(ctx)
 	cancel()
 	pool.ShutDown()
