@@ -8,7 +8,7 @@ import (
 )
 
 type Job interface {
-	Execute(ctx context.Context) error
+	Execute(ctx context.Context) chan JobResult
 }
 
 type JobRecord struct {
@@ -25,4 +25,4 @@ type JobResult struct {
 	Err   error
 }
 
-func (j *JobRecord) Execute(ctx context.Context) error
+func (j *JobRecord) Execute(ctx context.Context) chan JobResult
