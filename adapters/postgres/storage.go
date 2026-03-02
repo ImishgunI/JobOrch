@@ -1,8 +1,11 @@
 package postgres
 
 import (
+	"JobOrch/internal/job"
 	j "JobOrch/internal/job"
+	"JobOrch/internal/storage"
 	"context"
+	"log"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -112,4 +115,22 @@ func (r *PostgresRepo) GetPending(ctx context.Context, limit int) ([]j.JobRecord
 		return nil, err
 	}
 	return record, nil
+}
+
+func Updater(ctx context.Context, repository storage.JobRepository, result job.JobResult) {
+	if result.Err == nil {
+		err := repository.UpdateStatus(ctx, result.JobID, job.SUCCEEDED)
+		if err != nil {
+			log.Printf("%+v\n", err)
+		}
+	} else {
+		err := repository.UpdateStatus(ctx, result.JobID, job.FAILED)
+		if err != nil {
+			log.Printf("%+v\n", err)
+		}
+		err = repository.SetError(ctx, result.JobID, result.Err.Error())
+		if err != nil {
+			log.Printf("%+v\n", err)
+		}
+	}
 }
